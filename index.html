@@ -1,541 +1,817 @@
 <!DOCTYPE html>
-<html lang="th">
+<html lang="th" class="dark">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Health & BMI Analytics Dashboard</title>
-    <!-- โหลด Tailwind CSS สำหรับการจัดสไตล์ระดับสูง -->
-    <script src="https://cdn.tailwindcss.com"></script>
-    <!-- โหลด Font Awesome สำหรับไอคอน -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <!-- โหลด Google Fonts (Kanit) เพื่อให้แสดงผลภาษาไทยได้สวยงามและทันสมัย -->
-    <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <title>Health Pro Analytics - วิเคราะห์ดัชนีมวลกาย และโภชนาการแบบเจาะลึก</title>
     
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        darkBg: '#080C15',
+                        cardBg: '#121A2D',
+                        cardBorder: '#1E293B',
+                        primaryGreen: '#10B981',
+                        accentGreen: '#22C55E',
+                        softBlue: '#3B82F6',
+                        warningYellow: '#EAB308',
+                        alertOrange: '#F97316',
+                        dangerRed: '#EF4444'
+                    },
+                    fontFamily: {
+                        kanit: ['Kanit', 'sans-serif']
+                    }
+                }
+            }
+        }
+    </script>
+    
+    <!-- Google Fonts: Kanit -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Kanit:ital,wght@0,300;0,400;0,500;0,600;0,700;1,300;1,400&display=swap" rel="stylesheet">
+    
+    <!-- FontAwesome Icons CDN -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
     <style>
         body {
             font-family: 'Kanit', sans-serif;
-            background-color: #f1f5f9; /* สีพื้นหลังโทนสะอาดตา */
-            background-image: radial-gradient(#cbd5e1 1px, transparent 1px);
-            background-size: 20px 20px;
+            background-color: #070B14;
+            color: #F1F5F9;
         }
 
-        /* ปรับแต่ง Scrollbar */
-        ::-webkit-scrollbar {
-            width: 8px;
-        }
-        ::-webkit-scrollbar-track {
-            background: #f1f1f1; 
-        }
-        ::-webkit-scrollbar-thumb {
-            background: #cbd5e1; 
-            border-radius: 4px;
-        }
-        ::-webkit-scrollbar-thumb:hover {
-            background: #94a3b8; 
+        /* Glassmorphism Card Effect */
+        .glass-card {
+            background: linear-gradient(135deg, rgba(18, 26, 45, 0.95) 0%, rgba(13, 19, 33, 0.98) 100%);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.5);
+            backdrop-filter: blur(12px);
         }
 
-        /* ปรับแต่ง input range (slider) แบบ Custom */
+        .glass-card-inner {
+            background: rgba(15, 23, 42, 0.6);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        /* Custom Range Slider Styling */
         input[type=range] {
             -webkit-appearance: none;
             width: 100%;
-            background: transparent;
-        }
-        input[type=range]::-webkit-slider-thumb {
-            -webkit-appearance: none;
-            height: 28px;
-            width: 28px;
-            border-radius: 50%;
-            background: #fff;
-            border: 3px solid #6366f1; /* สี Indigo */
-            cursor: pointer;
-            margin-top: -10px; 
-            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
-            transition: transform 0.1s;
-        }
-        input[type=range]::-webkit-slider-thumb:active {
-            transform: scale(1.1);
-        }
-        input[type=range]::-webkit-slider-runnable-track {
-            width: 100%;
-            height: 8px;
-            cursor: pointer;
-            background: #e2e8f0;
-            border-radius: 4px;
-        }
-        input[type=range]:focus {
+            background: #1E293B;
+            height: 6px;
+            border-radius: 9999px;
             outline: none;
         }
 
-        /* สไตล์ปุ่มเลือกเพศและกิจกรรม */
-        .selectable-card {
-            transition: all 0.2s ease-in-out;
-            border: 2px solid transparent;
-        }
-        .selectable-card.selected-male {
-            background-color: #eff6ff;
-            border-color: #3b82f6;
-            box-shadow: 0 4px 6px -1px rgba(59, 130, 246, 0.2);
-        }
-        .selectable-card.selected-female {
-            background-color: #fdf2f8;
-            border-color: #ec4899;
-            box-shadow: 0 4px 6px -1px rgba(236, 72, 153, 0.2);
-        }
-        .activity-card.selected {
-            background-color: #f0fdf4;
-            border-color: #22c55e;
+        input[type=range]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 22px;
+            height: 22px;
+            border-radius: 50%;
+            background: #10B981;
+            box-shadow: 0 0 12px rgba(16, 185, 129, 0.8);
+            cursor: pointer;
+            transition: all 0.15s ease-in-out;
+            border: 3px solid #0F172A;
         }
 
-        /* กราฟิกแสดงระดับ BMI */
-        .bmi-gradient-bar {
-            height: 16px;
-            border-radius: 8px;
-            background: linear-gradient(to right, 
-                #3b82f6 0%,   /* ผอม (ฟ้า) */
-                #3b82f6 20%,
-                #22c55e 20%,  /* ปกติ (เขียว) */
-                #22c55e 40%,
-                #eab308 40%,  /* ท้วม (เหลือง) */
-                #eab308 60%,
-                #f97316 60%,  /* อ้วน (ส้ม) */
-                #f97316 80%,
-                #ef4444 80%,  /* อ้วนมาก (แดง) */
-                #ef4444 100%
-            );
-            position: relative;
-            box-shadow: inset 0 2px 4px rgba(0,0,0,0.1);
+        input[type=range]::-webkit-slider-thumb:hover {
+            transform: scale(1.15);
+            background: #34D399;
+            box-shadow: 0 0 18px rgba(52, 211, 153, 1);
         }
-        
-        .bmi-indicator {
-            position: absolute;
-            top: -8px;
+
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
             width: 6px;
-            height: 32px;
-            background-color: #0f172a;
-            border-radius: 3px;
-            transform: translateX(-50%);
-            transition: left 0.8s cubic-bezier(0.34, 1.56, 0.64, 1); /* Bouncy transition */
-            box-shadow: 0 0 0 3px white, 0 4px 6px rgba(0,0,0,0.2);
+            height: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #0B111E;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #1E293B;
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #334155;
+        }
+
+        /* Meter Pin Animation */
+        .meter-pin {
+            transition: left 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+
+        /* Print Style Overrides */
+        @media print {
+            body {
+                background: white !important;
+                color: black !important;
+            }
+            .no-print {
+                display: none !important;
+            }
+            .print-only {
+                display: block !important;
+            }
+            .glass-card {
+                background: white !important;
+                border: 1px solid #ccc !important;
+                box-shadow: none !important;
+                color: black !important;
+            }
+            .text-white, .text-gray-200, .text-gray-300 {
+                color: black !important;
+            }
         }
     </style>
 </head>
-<body class="min-h-screen py-12 px-4 sm:px-6 lg:px-8 flex justify-center text-slate-800">
+<body class="min-h-screen antialiased flex flex-col justify-between selection:bg-emerald-500 selection:text-white">
 
-    <div class="max-w-4xl w-full grid grid-cols-1 lg:grid-cols-12 gap-8">
-        
-        <!-- ฝั่งซ้าย: ฟอร์มกรอกข้อมูล -->
-        <div class="lg:col-span-7 space-y-6">
-            
-            <div class="bg-white p-6 sm:p-8 rounded-3xl shadow-xl border border-slate-100">
-                <div class="mb-8">
-                    <h1 class="text-3xl font-bold text-slate-900 flex items-center">
-                        <i class="fas fa-heartbeat text-indigo-500 mr-3"></i> Health Analytics
-                    </h1>
-                    <p class="text-slate-500 mt-2">กรอกข้อมูลส่วนตัวของคุณเพื่อวิเคราะห์สุขภาพแบบเจาะลึก</p>
+    <div class="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-6 pb-4">
+        <header class="flex flex-col sm:flex-row items-center justify-between gap-4 pb-6 border-b border-slate-800/80">
+            <!-- Logo & Title -->
+            <div class="flex items-center space-x-3.5">
+                <div class="w-12 h-12 rounded-2xl bg-gradient-to-tr from-emerald-600 to-teal-400 p-0.5 shadow-lg shadow-emerald-900/40 flex items-center justify-center">
+                    <div class="w-full h-full bg-slate-950/80 rounded-[14px] flex items-center justify-center backdrop-blur-sm">
+                        <i class="fa-solid font-bold fa-heart-pulse text-2xl text-emerald-400 animate-pulse"></i>
+                    </div>
                 </div>
-
-                <div class="space-y-6">
-                    <!-- ช่องกรอกชื่อ -->
-                    <div>
-                        <label class="block text-sm font-medium text-slate-700 mb-2" for="name-input">
-                            <i class="fas fa-user text-indigo-500 mr-1.5"></i>ชื่อ - นามสกุล หรือ ชื่อเล่น
-                        </label>
-                        <input type="text" id="name-input" placeholder="เช่น คุณสมชาย สุขภาพดี" class="w-full px-4 py-3 rounded-2xl bg-slate-50 border border-slate-200 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:bg-white text-slate-800 transition-all font-medium">
+                <div>
+                    <div class="flex items-center space-x-2">
+                        <h1 class="text-2xl font-bold tracking-tight text-white">Health Pro</h1>
+                        <span class="px-2.5 py-0.5 text-xs font-semibold text-emerald-400 bg-emerald-950/80 border border-emerald-800/50 rounded-full tracking-wider uppercase">Analytics</span>
                     </div>
-
-                    <!-- แถวที่ 1: เพศ และ อายุ -->
-                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
-                        <!-- เลือกเพศ -->
-                        <div>
-                            <label class="block text-sm font-medium text-slate-700 mb-3">เพศ (Gender)</label>
-                            <div class="flex space-x-4">
-                                <button type="button" id="gender-male" class="selectable-card selected-male flex-1 py-4 px-2 rounded-2xl flex flex-col items-center justify-center bg-slate-50 border-slate-200">
-                                    <i class="fas fa-mars text-3xl mb-2 text-blue-500"></i>
-                                    <span class="font-medium text-slate-700">ผู้ชาย</span>
-                                </button>
-                                <button type="button" id="gender-female" class="selectable-card flex-1 py-4 px-2 rounded-2xl flex flex-col items-center justify-center bg-slate-50 border-slate-200">
-                                    <i class="fas fa-venus text-3xl mb-2 text-pink-500"></i>
-                                    <span class="font-medium text-slate-700">ผู้หญิง</span>
-                                </button>
-                            </div>
-                        </div>
-                        
-                        <!-- อายุ -->
-                        <div>
-                            <div class="flex justify-between items-end mb-3">
-                                <label class="block text-sm font-medium text-slate-700">อายุ (Age)</label>
-                                <span class="text-2xl font-bold text-indigo-600"><span id="age-display">25</span> <span class="text-sm text-slate-500 font-normal">ปี</span></span>
-                            </div>
-                            <div class="bg-slate-50 p-4 rounded-2xl border border-slate-200 h-[100px] flex items-center">
-                                <input type="range" id="age-slider" min="15" max="100" value="25" class="w-full">
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- แถวที่ 2: ส่วนสูง -->
-                    <div class="bg-slate-50 p-5 rounded-2xl border border-slate-200">
-                        <div class="flex justify-between items-end mb-4">
-                            <label class="block text-sm font-medium text-slate-700">ส่วนสูง (Height)</label>
-                            <div class="flex items-center">
-                                <input type="number" id="height-input" value="170" class="text-2xl font-bold text-indigo-600 bg-transparent w-20 text-right focus:outline-none focus:border-b-2 border-indigo-300">
-                                <span class="text-sm text-slate-500 ml-2">ซม.</span>
-                            </div>
-                        </div>
-                        <input type="range" id="height-slider" min="120" max="220" value="170" class="w-full">
-                    </div>
-
-                    <!-- แถวที่ 3: น้ำหนัก -->
-                    <div class="bg-slate-50 p-5 rounded-2xl border border-slate-200">
-                        <div class="flex justify-between items-end mb-4">
-                            <label class="block text-sm font-medium text-slate-700">น้ำหนัก (Weight)</label>
-                            <div class="flex items-center">
-                                <input type="number" id="weight-input" value="65" class="text-2xl font-bold text-indigo-600 bg-transparent w-20 text-right focus:outline-none focus:border-b-2 border-indigo-300">
-                                <span class="text-sm text-slate-500 ml-2">กก.</span>
-                            </div>
-                        </div>
-                        <input type="range" id="weight-slider" min="30" max="150" value="65" class="w-full">
-                    </div>
-
-                    <!-- แถวที่ 4: Activity Level -->
-                    <div>
-                        <div class="flex justify-between items-center mb-3">
-                            <label class="block text-sm font-medium text-slate-700">กิจกรรมทางกาย (Activity Level)</label>
-                            <span class="text-xs text-slate-400">* กดซ้ำเพื่อยกเลิกการเลือกได้</span>
-                        </div>
-                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                            <button type="button" class="activity-card text-left p-3 rounded-xl border-2 bg-slate-50 border-slate-200 hover:border-green-300 transition-all" data-multiplier="1.2">
-                                <div class="font-medium text-slate-800">นั่งทำงานเป็นหลัก</div>
-                                <div class="text-xs text-slate-500 mt-1">ไม่ออกกำลังกายเลย</div>
-                            </button>
-                            <button type="button" class="activity-card text-left p-3 rounded-xl border-2 bg-slate-50 border-slate-200 hover:border-green-300 transition-all" data-multiplier="1.375">
-                                <div class="font-medium text-slate-800">ออกกำลังกายเบาๆ</div>
-                                <div class="text-xs text-slate-500 mt-1">1-3 วัน/สัปดาห์</div>
-                            </button>
-                            <button type="button" class="activity-card text-left p-3 rounded-xl border-2 bg-slate-50 border-slate-200 hover:border-green-300 transition-all" data-multiplier="1.55">
-                                <div class="font-medium text-slate-800">ออกกำลังกายปานกลาง</div>
-                                <div class="text-xs text-slate-500 mt-1">3-5 วัน/สัปดาห์</div>
-                            </button>
-                            <button type="button" class="activity-card text-left p-3 rounded-xl border-2 bg-slate-50 border-slate-200 hover:border-green-300 transition-all" data-multiplier="1.725">
-                                <div class="font-medium text-slate-800">ออกกำลังกายหนัก</div>
-                                <div class="text-xs text-slate-500 mt-1">6-7 วัน/สัปดาห์</div>
-                            </button>
-                        </div>
-                    </div>
-
-                    <!-- ปุ่มคำนวณ -->
-                    <button id="calculate-btn" class="w-full mt-4 py-4 px-4 bg-indigo-600 hover:bg-indigo-700 text-white rounded-2xl font-semibold text-lg shadow-lg shadow-indigo-200 transition-all transform hover:-translate-y-1">
-                        วิเคราะห์ผลสุขภาพ
-                    </button>
+                    <p class="text-xs text-slate-400 font-light mt-0.5">วิเคราะห์ดัชนีมวลกาย และโภชนาการแบบเจาะลึก</p>
                 </div>
             </div>
-        </div>
 
-        <!-- ฝั่งขวา: แสดงผลลัพธ์ -->
-        <div class="lg:col-span-5 relative">
-            <div id="result-dashboard" class="bg-slate-900 text-white p-6 sm:p-8 rounded-3xl shadow-2xl sticky top-8 opacity-50 transition-opacity duration-500 blur-sm pointer-events-none">
-                
-                <!-- Overlay ก่อนคำนวณ -->
-                <div id="result-overlay" class="absolute inset-0 z-10 flex flex-col items-center justify-center bg-slate-900/80 rounded-3xl backdrop-blur-sm">
-                    <i class="fas fa-chart-pie text-5xl text-slate-400 mb-4"></i>
-                    <p class="text-slate-300 font-medium">กรุณากดปุ่ม "วิเคราะห์ผลสุขภาพ"</p>
+            <!-- Header Action Controls -->
+            <div class="flex items-center space-x-3">
+                <button id="historyBtn" onclick="openHistoryModal()" class="px-3.5 py-2 text-sm font-medium text-slate-300 bg-slate-800/70 hover:bg-slate-700/80 hover:text-white border border-slate-700 rounded-xl transition flex items-center gap-2 shadow-sm">
+                    <i class="fa-solid fa-clock-rotate-left text-emerald-400"></i>
+                    <span>ประวัติบันทึก</span>
+                </button>
+                <button id="settingsBtn" onclick="openSettingsModal()" title="ตั้งค่า" class="w-10 h-10 flex items-center justify-center text-slate-300 bg-slate-800/70 hover:bg-slate-700 hover:text-white border border-slate-700 rounded-xl transition">
+                    <i class="fa-solid fa-gear text-slate-400"></i>
+                </button>
+                <button onclick="resetInputs()" class="px-3.5 py-2 text-sm font-medium text-slate-300 bg-slate-800/70 hover:bg-slate-700/80 hover:text-white border border-slate-700 rounded-xl transition flex items-center gap-2 shadow-sm">
+                    <i class="fa-solid fa-rotate-right text-slate-400"></i>
+                    <span>ล้างข้อมูล</span>
+                </button>
+            </div>
+        </header>
+
+        <main class="grid grid-cols-1 lg:grid-cols-12 gap-6 mt-6">
+            
+            <!-- LEFT COLUMN: Personal Info Form (5 cols) -->
+            <section class="lg:col-span-5 flex flex-col gap-5">
+                <div class="glass-card rounded-2xl p-6 relative overflow-hidden">
+                    
+                    <div class="flex items-center justify-between pb-4 border-b border-slate-800">
+                        <div class="flex items-center space-x-2.5">
+                            <i class="fa-solid fa-sliders text-emerald-400 text-lg"></i>
+                            <h2 class="text-lg font-semibold text-white">ข้อมูลส่วนบุคคล</h2>
+                        </div>
+                        <span class="text-[11px] text-slate-400 font-light">* กรอกข้อมูลเพื่อประมวลผล</span>
+                    </div>
+
+                    <div class="space-y-5 mt-5">
+                        
+                        <!-- Name Input -->
+                        <div>
+                            <label for="userName" class="block text-xs font-medium text-slate-300 mb-1.5">
+                                <i class="fa-solid fa-user text-emerald-400 mr-1.5"></i>ชื่อ - นามสกุล หรือ ชื่อเล่น
+                            </label>
+                            <input type="text" id="userName" value="คุณผู้ใช้งาน" placeholder="เช่น คุณสมชาย สุขภาพดี" 
+                                class="w-full px-4 py-2.5 text-sm bg-slate-900/90 border border-slate-700/80 rounded-xl text-white placeholder-slate-500 focus:outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 transition">
+                        </div>
+
+                        <!-- Gender Selector -->
+                        <div>
+                            <label class="block text-xs font-medium text-slate-300 mb-2">
+                                <i class="fa-solid fa-venus-mars text-emerald-400 mr-1.5"></i>เพศกำเนิด (Gender)
+                            </label>
+                            <div class="grid grid-cols-2 gap-3">
+                                <button type="button" id="genderMale" onclick="setGender('male')" 
+                                    class="gender-btn relative py-3 px-4 rounded-xl border font-medium text-sm flex items-center justify-center gap-2 transition duration-200 bg-emerald-950/40 border-emerald-500/80 text-emerald-400 shadow-lg shadow-emerald-950/50">
+                                    <i class="fa-solid fa-mars text-lg"></i>
+                                    <span>ชาย</span>
+                                </button>
+                                <button type="button" id="genderFemale" onclick="setGender('female')" 
+                                    class="gender-btn relative py-3 px-4 rounded-xl border border-slate-800 bg-slate-900/60 text-slate-400 font-medium text-sm flex items-center justify-center gap-2 hover:border-slate-700 transition duration-200">
+                                    <i class="fa-solid fa-venus text-lg"></i>
+                                    <span>หญิง</span>
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Numeric Sliders Grid -->
+                        <div class="grid grid-cols-2 gap-4 pt-1">
+                            
+                            <!-- Age Slider -->
+                            <div class="glass-card-inner p-3.5 rounded-xl border border-slate-800">
+                                <div class="flex justify-between items-center mb-2">
+                                    <span class="text-xs text-slate-300 font-medium">อายุ (Age)</span>
+                                    <div class="flex items-baseline space-x-1">
+                                        <span id="ageVal" class="text-emerald-400 font-bold text-lg">25</span>
+                                        <span class="text-[11px] text-slate-400">ปี</span>
+                                    </div>
+                                </div>
+                                <input type="range" id="age" min="10" max="100" value="25" oninput="updateMetrics()">
+                            </div>
+
+                            <!-- Height Slider -->
+                            <div class="glass-card-inner p-3.5 rounded-xl border border-slate-800">
+                                <div class="flex justify-between items-center mb-2">
+                                    <span class="text-xs text-slate-300 font-medium">ส่วนสูง (Height)</span>
+                                    <div class="flex items-baseline space-x-1">
+                                        <span id="heightVal" class="text-emerald-400 font-bold text-lg">170</span>
+                                        <span class="text-[11px] text-slate-400">ซม.</span>
+                                    </div>
+                                </div>
+                                <input type="range" id="height" min="100" max="220" value="170" oninput="updateMetrics()">
+                            </div>
+
+                            <!-- Weight Slider -->
+                            <div class="glass-card-inner p-3.5 rounded-xl border border-slate-800">
+                                <div class="flex justify-between items-center mb-2">
+                                    <span class="text-xs text-slate-300 font-medium">น้ำหนัก (Weight)</span>
+                                    <div class="flex items-baseline space-x-1">
+                                        <span id="weightVal" class="text-emerald-400 font-bold text-lg">65</span>
+                                        <span class="text-[11px] text-slate-400">กก.</span>
+                                    </div>
+                                </div>
+                                <input type="range" id="weight" min="30" max="200" value="65" oninput="updateMetrics()">
+                            </div>
+
+                            <!-- Waist Slider -->
+                            <div class="glass-card-inner p-3.5 rounded-xl border border-slate-800">
+                                <div class="flex justify-between items-center mb-2">
+                                    <span class="text-xs text-slate-300 font-medium">รอบเอว (Waist)</span>
+                                    <div class="flex items-baseline space-x-1">
+                                        <span id="waistVal" class="text-emerald-400 font-bold text-lg">75</span>
+                                        <span class="text-[11px] text-slate-400">ซม.</span>
+                                    </div>
+                                </div>
+                                <input type="range" id="waist" min="40" max="150" value="75" oninput="updateMetrics()">
+                            </div>
+
+                        </div>
+
+                        <!-- Activity Level Selection -->
+                        <div class="pt-2">
+                            <label class="block text-xs font-medium text-slate-300 mb-2">
+                                <i class="fa-solid fa-person-running text-emerald-400 mr-1.5"></i>ระดับกิจกรรมทางกาย (Activity Level)
+                            </label>
+                            <select id="activity" onchange="updateMetrics()" class="w-full px-3.5 py-2.5 text-xs sm:text-sm bg-slate-900/90 border border-slate-700 rounded-xl text-slate-200 focus:outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 transition">
+                                <option value="1.2">ไม่ออกกำลังกาย / นั่งทำงานเป็นหลัก (Sedentary)</option>
+                                <option value="1.375">ออกกำลังกายเบาๆ 1-3 วัน/สัปดาห์ (Light Active)</option>
+                                <option value="1.55" selected>ออกกำลังกายปานกลาง 3-5 วัน/สัปดาห์ (Moderate)</option>
+                                <option value="1.725">ออกกำลังกายหนัก 6-7 วัน/สัปดาห์ (Very Active)</option>
+                                <option value="1.9">ออกกำลังกายหนักมาก / นักกีฬา (Extra Active)</option>
+                            </select>
+                        </div>
+
+                    </div>
                 </div>
+            </section>
 
-                <div class="mb-6 border-b border-slate-700 pb-3 flex justify-between items-center">
+            <!-- RIGHT COLUMN: Health Analysis Output (7 cols) -->
+            <section class="lg:col-span-7 flex flex-col gap-5">
+                <div class="glass-card rounded-2xl p-6 flex-1 flex flex-col justify-between">
+                    
                     <div>
-                        <h2 class="text-xl font-semibold text-slate-200">ผลการวิเคราะห์สุขภาพ</h2>
-                        <p id="user-greeting" class="text-sm text-indigo-400 font-medium">สำหรับ: คุณผู้ใช้งาน</p>
-                    </div>
-                    <button id="print-btn" title="พิมพ์หรือบันทึกรายงาน" class="hidden text-slate-400 hover:text-white bg-slate-800 hover:bg-slate-700 px-3 py-2 rounded-xl transition-all border border-slate-700 text-xs flex items-center gap-1.5">
-                        <i class="fas fa-print"></i> พิมพ์รายงาน
-                    </button>
-                </div>
-                
-                <!-- BMI Score -->
-                <div class="text-center mb-8">
-                    <p class="text-sm text-slate-400 mb-1">ดัชนีมวลกาย (BMI)</p>
-                    <div class="flex items-end justify-center gap-2">
-                        <span id="bmi-score" class="text-6xl font-black text-white">0.0</span>
-                    </div>
-                    <div id="bmi-badge" class="inline-block mt-3 px-4 py-1.5 rounded-full text-sm font-bold bg-slate-800 text-slate-300">
-                        รอการคำนวณ
-                    </div>
-                </div>
+                        <!-- Section Header -->
+                        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-4 border-b border-slate-800">
+                            <div>
+                                <div class="flex items-center space-x-2">
+                                    <span class="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-pulse"></span>
+                                    <h2 class="text-lg font-semibold text-white">รายงานผลวิเคราะห์สุขภาพ</h2>
+                                </div>
+                                <p class="text-xs text-slate-400 mt-1">ประมวลผลสำหรับ: <span id="displayUserName" class="text-emerald-400 font-medium">คุณผู้ใช้งาน</span></p>
+                            </div>
 
-                <!-- BMI Scale -->
-                <div class="mb-10 px-2">
-                    <div class="bmi-gradient-bar w-full">
-                        <div id="bmi-indicator" class="bmi-indicator" style="left: 0%;"></div>
-                    </div>
-                    <div class="flex justify-between text-[10px] sm:text-xs text-slate-400 mt-3 font-medium">
-                        <span>ผอม</span>
-                        <span>ปกติ</span>
-                        <span>ท้วม</span>
-                        <span>อ้วน</span>
-                        <span>อ้วนมาก</span>
-                    </div>
-                </div>
+                            <div class="flex items-center space-x-2">
+                                <button onclick="saveRecord()" class="px-3.5 py-2 text-xs font-medium bg-slate-800 hover:bg-slate-700 text-emerald-400 border border-slate-700 rounded-xl transition flex items-center gap-1.5 shadow-sm">
+                                    <i class="fa-solid fa-bookmark"></i>
+                                    <span>บันทึกผล</span>
+                                </button>
+                                <button onclick="printReport()" class="px-3.5 py-2 text-xs font-medium bg-emerald-600 hover:bg-emerald-500 text-white border border-emerald-500 rounded-xl transition flex items-center gap-1.5 shadow-md shadow-emerald-900/30">
+                                    <i class="fa-solid fa-print"></i>
+                                    <span>พิมพ์รายงาน</span>
+                                </button>
+                            </div>
+                        </div>
 
-                <!-- Detailed Stats Grid -->
-                <div class="grid grid-cols-2 gap-4 mb-6">
-                    <!-- BMR -->
-                    <div class="bg-slate-800 p-4 rounded-2xl border border-slate-700">
-                        <p class="text-xs text-slate-400 mb-1" title="พลังงานพื้นฐานที่ร่างกายต้องการขณะพักผ่อน">BMR (พลังงานพื้นฐาน)</p>
-                        <p class="text-xl font-bold text-indigo-400"><span id="bmr-score">0</span> <span class="text-xs font-normal text-slate-500">kcal</span></p>
-                    </div>
-                    <!-- TDEE -->
-                    <div class="bg-slate-800 p-4 rounded-2xl border border-slate-700">
-                        <p class="text-xs text-slate-400 mb-1" title="พลังงานทั้งหมดที่ใช้ในแต่ละวัน">TDEE (พลังงานที่ใช้จริง)</p>
-                        <p class="text-xl font-bold text-green-400"><span id="tdee-score">0</span> <span class="text-xs font-normal text-slate-500">kcal</span></p>
-                    </div>
-                </div>
+                        <!-- BMI Main Card Banner -->
+                        <div class="glass-card-inner rounded-2xl p-5 mt-5 border border-slate-800/80 relative overflow-hidden">
+                            <div class="grid grid-cols-1 md:grid-cols-12 gap-6 items-center">
+                                
+                                <!-- BMI Value Display -->
+                                <div class="md:col-span-5 flex flex-col items-center justify-center p-3 border-b md:border-b-0 md:border-r border-slate-800">
+                                    <span class="text-xs text-slate-400 font-medium tracking-wide uppercase">ดัชนีมวลกาย (BMI)</span>
+                                    <div id="bmiValue" class="text-5xl font-black text-white tracking-tight my-2">22.5</div>
+                                    <span id="bmiStatusBadge" class="px-3.5 py-1 text-xs font-semibold rounded-full bg-emerald-950/80 border border-emerald-500/50 text-emerald-400 transition">
+                                        ปกติ (สมส่วน)
+                                    </span>
+                                </div>
 
-                <!-- Ideal Weight -->
-                <div class="bg-slate-800 p-4 rounded-2xl border border-slate-700 mb-6 flex items-center justify-between">
-                    <div>
-                        <p class="text-sm text-slate-400">ช่วงน้ำหนักที่เหมาะสม</p>
-                        <p class="text-xs text-slate-500 mt-0.5">เพื่อให้ BMI อยู่ในเกณฑ์ปกติ (18.5 - 22.9)</p>
-                    </div>
-                    <div class="text-right">
-                        <p id="ideal-weight" class="text-lg font-bold text-white">0 - 0 กก.</p>
-                    </div>
-                </div>
+                                <!-- Asian BMI Spectrum Bar -->
+                                <div class="md:col-span-7 flex flex-col justify-center space-y-3">
+                                    <div class="flex items-center justify-between text-xs">
+                                        <span class="text-slate-300 font-medium">ระดับ BMI (เกณฑ์เอเชีย)</span>
+                                        <span class="text-slate-400 text-[11px]">ช่วงปกติ: 18.5 – 22.9</span>
+                                    </div>
 
-                <!-- Advice Box -->
-                <div id="advice-box" class="bg-slate-800/50 p-4 rounded-2xl border border-slate-700/50 text-sm text-slate-300 leading-relaxed">
-                    กรุณากรอกข้อมูลและกดคำนวณเพื่อรับคำแนะนำด้านสุขภาพ
-                </div>
+                                    <!-- Multi-colored Scale Bar -->
+                                    <div class="relative py-2">
+                                        <div class="h-3.5 w-full rounded-full flex overflow-hidden shadow-inner bg-slate-900 border border-slate-800">
+                                            <div class="w-[18.5%] bg-blue-500" title="ผอม (<18.5)"></div>
+                                            <div class="w-[22%] bg-emerald-500" title="ปกติ (18.5-22.9)"></div>
+                                            <div class="w-[10%] bg-amber-400" title="ท้วม (23.0-24.9)"></div>
+                                            <div class="w-[24.5%] bg-orange-500" title="อ้วน (25.0-29.9)"></div>
+                                            <div class="w-[25%] bg-red-500" title="อ้วนมาก (≥30.0)"></div>
+                                        </div>
 
+                                        <!-- Indicator Pin Cursor -->
+                                        <div id="bmiPin" class="meter-pin absolute top-0 -ml-2.5 flex flex-col items-center" style="left: 38%;">
+                                            <div class="w-5 h-7 bg-white rounded-md shadow-lg border-2 border-slate-900 flex items-center justify-center">
+                                                <div class="w-1.5 h-3 bg-emerald-600 rounded-full"></div>
+                                            </div>
+                                            <i class="fa-solid fa-caret-down text-white text-xs -mt-1 drop-shadow"></i>
+                                        </div>
+                                    </div>
+
+                                    <!-- Labels under bar -->
+                                    <div class="grid grid-cols-5 text-[10px] sm:text-xs text-center text-slate-400 font-medium pt-1">
+                                        <span class="text-blue-400">ผอม</span>
+                                        <span class="text-emerald-400">ปกติ</span>
+                                        <span class="text-amber-400">ท้วม</span>
+                                        <span class="text-orange-400">อ้วน</span>
+                                        <span class="text-red-400">อ้วนมาก</span>
+                                    </div>
+                                </div>
+
+                            </div>
+                        </div>
+
+                        <!-- Detailed Metrics Cards Grid -->
+                        <div class="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-3.5 mt-5">
+                            
+                            <!-- BMR Card -->
+                            <div class="glass-card-inner p-4 rounded-xl border border-slate-800 flex flex-col justify-between hover:border-slate-700 transition">
+                                <div class="flex items-center justify-between text-slate-400">
+                                    <span class="text-xs font-medium">BMR (พักผ่อน)</span>
+                                    <i class="fa-solid fa-bed text-indigo-400 text-sm"></i>
+                                </div>
+                                <div class="mt-3">
+                                    <div class="flex items-baseline space-x-1">
+                                        <span id="bmrValue" class="text-2xl font-bold text-white">1,592</span>
+                                        <span class="text-xs text-slate-400">kcal</span>
+                                    </div>
+                                    <span class="text-[10px] text-slate-400 block mt-1">อัตราเผาผลาญพื้นฐาน</span>
+                                </div>
+                            </div>
+
+                            <!-- TDEE Card -->
+                            <div class="glass-card-inner p-4 rounded-xl border border-slate-800 flex flex-col justify-between hover:border-slate-700 transition">
+                                <div class="flex items-center justify-between text-slate-400">
+                                    <span class="text-xs font-medium">TDEE (ใช้จริง)</span>
+                                    <i class="fa-solid fa-fire-flame-curved text-amber-400 text-sm"></i>
+                                </div>
+                                <div class="mt-3">
+                                    <div class="flex items-baseline space-x-1">
+                                        <span id="tdeeValue" class="text-2xl font-bold text-white">2,467</span>
+                                        <span class="text-xs text-slate-400">kcal</span>
+                                    </div>
+                                    <span class="text-[10px] text-slate-400 block mt-1">เผาผลาญรวมตามกิจกรรม</span>
+                                </div>
+                            </div>
+
+                            <!-- Body Fat Card -->
+                            <div class="glass-card-inner p-4 rounded-xl border border-slate-800 flex flex-col justify-between hover:border-slate-700 transition">
+                                <div class="flex items-center justify-between text-slate-400">
+                                    <span class="text-xs font-medium">เปอร์เซ็นต์ไขมัน</span>
+                                    <i class="fa-solid fa-percent text-amber-400 text-sm"></i>
+                                </div>
+                                <div class="mt-3">
+                                    <div class="flex items-baseline space-x-1">
+                                        <span id="fatPercentValue" class="text-2xl font-bold text-white">16.5</span>
+                                        <span class="text-xs text-slate-400">%</span>
+                                    </div>
+                                    <span id="fatStatusText" class="text-[10px] text-emerald-400 block mt-1">สมส่วน</span>
+                                </div>
+                            </div>
+
+                            <!-- Waist-to-Height Ratio (WHtR) -->
+                            <div class="glass-card-inner p-4 rounded-xl border border-slate-800 flex flex-col justify-between hover:border-slate-700 transition">
+                                <div class="flex items-center justify-between text-slate-400">
+                                    <span class="text-xs font-medium">อัตราส่วนรอบเอว</span>
+                                    <i class="fa-solid fa-ruler-horizontal text-emerald-400 text-sm"></i>
+                                </div>
+                                <div class="mt-3">
+                                    <div class="flex items-baseline space-x-1">
+                                        <span id="whtrValue" class="text-2xl font-bold text-white">0.44</span>
+                                    </div>
+                                    <span id="whtrStatusText" class="text-[10px] text-emerald-400 block mt-1">รอบเอวปกติ</span>
+                                </div>
+                            </div>
+
+                        </div>
+
+                        <!-- Secondary Summary Grid -->
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3.5 mt-3.5">
+                            <!-- Ideal Weight Range -->
+                            <div class="glass-card-inner p-4 rounded-xl border border-slate-800 flex items-center justify-between">
+                                <div class="flex items-center space-x-3">
+                                    <div class="w-10 h-10 rounded-xl bg-blue-950/60 border border-blue-800/50 flex items-center justify-center text-blue-400">
+                                        <i class="fa-solid fa-weight-scale text-base"></i>
+                                    </div>
+                                    <div>
+                                        <span class="text-xs text-slate-400 block">ช่วงน้ำหนักที่เหมาะสม</span>
+                                        <span id="idealWeightRange" class="text-sm font-semibold text-white">53.5 – 66.2 กก.</span>
+                                    </div>
+                                </div>
+                                <span class="text-[10px] px-2 py-0.5 rounded bg-blue-950 text-blue-300 border border-blue-800/40">BMI 18.5-22.9</span>
+                            </div>
+
+                            <!-- Daily Water Requirement -->
+                            <div class="glass-card-inner p-4 rounded-xl border border-slate-800 flex items-center justify-between">
+                                <div class="flex items-center space-x-3">
+                                    <div class="w-10 h-10 rounded-xl bg-cyan-950/60 border border-cyan-800/50 flex items-center justify-center text-cyan-400">
+                                        <i class="fa-solid fa-glass-water text-base"></i>
+                                    </div>
+                                    <div>
+                                        <span class="text-xs text-slate-400 block">ปริมาณน้ำดื่มที่แนะนำ</span>
+                                        <span id="waterIntake" class="text-sm font-semibold text-white">2.3 ลิตร / วัน</span>
+                                    </div>
+                                </div>
+                                <span id="waterGlasses" class="text-[10px] px-2 py-0.5 rounded bg-cyan-950 text-cyan-300 border border-cyan-800/40">~ 9-10 แก้ว</span>
+                            </div>
+                        </div>
+
+                    </div>
+
+                    <!-- Recommendation Advice Footer -->
+                    <div id="healthAdviceBox" class="mt-5 p-4 rounded-xl bg-emerald-950/30 border border-emerald-800/40 flex items-start space-x-3">
+                        <i class="fa-solid fa-circle-check text-emerald-400 text-lg mt-0.5 flex-shrink-0"></i>
+                        <p id="healthAdviceText" class="text-xs text-slate-300 leading-relaxed">
+                            คุณมีค่าดัชนีมวลกายอยู่ในเกณฑ์สมส่วน สุขภาพดี! ควรดูแลรักษาการรับประทานอาหารที่มีสารอาหารครบถ้วน และออกกำลังกายสม่ำเสมออย่างต่อเนื่อง
+                        </p>
+                    </div>
+
+                </div>
+            </section>
+
+        </main>
+    </div>
+
+    <!-- History Modal -->
+    <div id="historyModal" class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
+        <div class="glass-card w-full max-w-2xl rounded-2xl p-6 border border-slate-800 shadow-2xl relative max-h-[85vh] flex flex-col">
+            <div class="flex items-center justify-between pb-4 border-b border-slate-800">
+                <div class="flex items-center space-x-2.5">
+                    <i class="fa-solid fa-clock-rotate-left text-emerald-400 text-lg"></i>
+                    <h3 class="text-lg font-semibold text-white">ประวัติการประมวลผลสุขภาพ</h3>
+                </div>
+                <button onclick="closeHistoryModal()" class="text-slate-400 hover:text-white transition">
+                    <i class="fa-solid fa-xmark text-lg"></i>
+                </button>
+            </div>
+
+            <div id="historyList" class="flex-1 overflow-y-auto my-4 space-y-3 pr-1">
+                <!-- Dynamically populated -->
+            </div>
+
+            <div class="flex justify-between items-center pt-3 border-t border-slate-800">
+                <button onclick="clearHistory()" class="px-3.5 py-2 text-xs font-medium text-red-400 bg-red-950/40 hover:bg-red-900/60 border border-red-800/50 rounded-xl transition flex items-center gap-1.5">
+                    <i class="fa-solid fa-trash"></i>
+                    <span>ลบประวัติทั้งหมด</span>
+                </button>
+                <button onclick="closeHistoryModal()" class="px-4 py-2 text-xs font-medium bg-slate-800 text-slate-300 hover:bg-slate-700 rounded-xl transition">
+                    ปิดหน้าต่าง
+                </button>
             </div>
         </div>
     </div>
 
+    <!-- Settings Modal -->
+    <div id="settingsModal" class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
+        <div class="glass-card w-full max-w-md rounded-2xl p-6 border border-slate-800 shadow-2xl relative">
+            <div class="flex items-center justify-between pb-4 border-b border-slate-800">
+                <div class="flex items-center space-x-2.5">
+                    <i class="fa-solid fa-gear text-emerald-400 text-lg"></i>
+                    <h3 class="text-lg font-semibold text-white">ตั้งค่าการแสดงผล</h3>
+                </div>
+                <button onclick="closeSettingsModal()" class="text-slate-400 hover:text-white transition">
+                    <i class="fa-solid fa-xmark text-lg"></i>
+                </button>
+            </div>
+
+            <div class="space-y-4 my-5">
+                <div>
+                    <label class="block text-xs font-medium text-slate-300 mb-2">มาตรฐานเกณฑ์ BMI</label>
+                    <select id="settingBmiStandard" class="w-full px-3 py-2 text-xs bg-slate-900 border border-slate-700 rounded-xl text-slate-200">
+                        <option value="asian" selected>เกณฑ์เอเชีย (Asian Standard - WHO 2000)</option>
+                        <option value="international">เกณฑ์สากล (International Standard)</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-xs font-medium text-slate-300 mb-2">สูตรคำนวณ BMR</label>
+                    <select id="settingBmrFormula" class="w-full px-3 py-2 text-xs bg-slate-900 border border-slate-700 rounded-xl text-slate-200">
+                        <option value="mifflin" selected>Mifflin-St Jeor (แม่นยำสูง)</option>
+                        <option value="harris">Harris-Benedict (คลาสสิก)</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="flex justify-end pt-3 border-t border-slate-800">
+                <button onclick="saveSettings()" class="px-4 py-2 text-xs font-medium bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl transition">
+                    บันทึกการตั้งค่า
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast Notification -->
+    <div id="toast" class="fixed bottom-5 right-5 z-50 bg-slate-800 text-emerald-400 px-4 py-3 rounded-xl border border-slate-700 shadow-2xl flex items-center space-x-2 transition-all transform translate-y-20 opacity-0 pointer-events-none">
+        <i class="fa-solid fa-circle-check text-emerald-400"></i>
+        <span id="toastMsg" class="text-xs font-medium text-slate-200">บันทึกข้อมูลสำเร็จ</span>
+    </div>
+
     <script>
-        document.addEventListener('DOMContentLoaded', () => {
-            // State Variables
-            let gender = 'male';
-            let activityMultiplier = null;
+        // State variables
+        let currentGender = 'male';
+        let savedHistory = JSON.parse(localStorage.getItem('health_pro_history') || '[]');
 
-            // DOM Elements - Inputs
-            const nameInput = document.getElementById('name-input');
-            const btnMale = document.getElementById('gender-male');
-            const btnFemale = document.getElementById('gender-female');
-            
-            const ageSlider = document.getElementById('age-slider');
-            const ageDisplay = document.getElementById('age-display');
-            
-            const heightSlider = document.getElementById('height-slider');
-            const heightInput = document.getElementById('height-input');
-            
-            const weightSlider = document.getElementById('weight-slider');
-            const weightInput = document.getElementById('weight-input');
-            
-            const activityCards = document.querySelectorAll('.activity-card');
-            const calculateBtn = document.getElementById('calculate-btn');
-
-            // DOM Elements - Outputs
-            const dashboard = document.getElementById('result-dashboard');
-            const overlay = document.getElementById('result-overlay');
-            const userGreeting = document.getElementById('user-greeting');
-            const printBtn = document.getElementById('print-btn');
-            const bmiScoreEl = document.getElementById('bmi-score');
-            const bmiBadgeEl = document.getElementById('bmi-badge');
-            const bmiIndicator = document.getElementById('bmi-indicator');
-            const bmrScoreEl = document.getElementById('bmr-score');
-            const tdeeScoreEl = document.getElementById('tdee-score');
-            const idealWeightEl = document.getElementById('ideal-weight');
-            const adviceBox = document.getElementById('advice-box');
-
-            // Helper function ล้างสไตล์การเลือกกิจกรรมทั้งหมด
-            function clearActivitySelections() {
-                activityCards.forEach(c => {
-                    c.classList.remove('selected');
-                    c.style.borderColor = '';
-                    c.style.backgroundColor = '';
-                });
-            }
-
-            // Event Listeners: Gender Selection
-            btnMale.addEventListener('click', () => {
-                gender = 'male';
-                btnMale.classList.add('selected-male');
-                btnMale.classList.remove('bg-slate-50', 'border-slate-200');
-                btnFemale.classList.remove('selected-female');
-                btnFemale.classList.add('bg-slate-50', 'border-slate-200');
+        // Initialize App
+        window.addEventListener('DOMContentLoaded', () => {
+            // Attach name change listener
+            document.getElementById('userName').addEventListener('input', (e) => {
+                const name = e.target.value.trim() || 'คุณผู้ใช้งาน';
+                document.getElementById('displayUserName').textContent = name;
             });
 
-            btnFemale.addEventListener('click', () => {
-                gender = 'female';
-                btnFemale.classList.add('selected-female');
-                btnFemale.classList.remove('bg-slate-50', 'border-slate-200');
-                btnMale.classList.remove('selected-male');
-                btnMale.classList.add('bg-slate-50', 'border-slate-200');
-            });
-
-            // Event Listeners: Sync Sliders and Inputs
-            ageSlider.addEventListener('input', (e) => ageDisplay.textContent = e.target.value);
-            
-            heightSlider.addEventListener('input', (e) => heightInput.value = e.target.value);
-            heightInput.addEventListener('input', (e) => heightSlider.value = e.target.value || 0);
-            
-            weightSlider.addEventListener('input', (e) => weightInput.value = e.target.value);
-            weightInput.addEventListener('input', (e) => weightSlider.value = e.target.value || 0);
-
-            // Event Listeners: Activity Level Selection (สามารถกดเลือกและกดซ้ำเพื่อยกเลิกได้)
-            activityCards.forEach(card => {
-                card.addEventListener('click', () => {
-                    const isAlreadySelected = card.classList.contains('selected');
-                    
-                    // ล้างการเลือกเดิมทั้งหมดก่อน
-                    clearActivitySelections();
-
-                    if (!isAlreadySelected) {
-                        // ถ้ายังไม่ได้เลือก -> ให้ทำการเลือก
-                        card.classList.add('selected');
-                        card.style.borderColor = '#22c55e';
-                        card.style.backgroundColor = '#f0fdf4';
-                        activityMultiplier = parseFloat(card.dataset.multiplier);
-                    } else {
-                        // ถ้าถูกเลือกอยู่แล้วแล้วกดซ้ำ -> ยกเลิกการเลือก
-                        activityMultiplier = null;
-                    }
-                });
-            });
-
-            calculateBtn.addEventListener('click', () => {
-                // รับค่าจาก Form
-                const userName = nameInput.value.trim() || 'ผู้ใช้งาน';
-                const age = parseInt(ageSlider.value);
-                const heightCm = parseFloat(heightInput.value);
-                const weightKg = parseFloat(weightInput.value);
-
-                if (!heightCm || !weightKg || heightCm <= 0 || weightKg <= 0) {
-                    const originalText = calculateBtn.innerHTML;
-                    calculateBtn.innerHTML = '<i class="fas fa-exclamation-triangle"></i> ข้อมูลไม่ถูกต้อง';
-                    calculateBtn.classList.replace('bg-indigo-600', 'bg-red-500');
-                    setTimeout(() => {
-                        calculateBtn.innerHTML = originalText;
-                        calculateBtn.classList.replace('bg-red-500', 'bg-indigo-600');
-                    }, 2000);
-                    return;
-                }
-
-                // 1. คำนวณ BMI
-                const heightM = heightCm / 100;
-                const bmi = weightKg / (heightM * heightM);
-
-                // 2. คำนวณ BMR
-                let bmr = 0;
-                if (gender === 'male') {
-                    bmr = (10 * weightKg) + (6.25 * heightCm) - (5 * age) + 5;
-                } else {
-                    bmr = (10 * weightKg) + (6.25 * heightCm) - (5 * age) - 161;
-                }
-
-                // 3. คำนวณ TDEE (หากยกเลิกกิจกรรมทางกาย จะคำนวณตัวคูณพื้นฐาน 1.0)
-                const effectiveMultiplier = activityMultiplier || 1.0;
-                const tdee = bmr * effectiveMultiplier;
-
-                // 4. คำนวณ Ideal Weight Range (อิงตาม BMI 18.5 - 22.9 สำหรับคนเอเชีย)
-                const minWeight = 18.5 * (heightM * heightM);
-                const maxWeight = 22.9 * (heightM * heightM);
-
-                // วิเคราะห์เกณฑ์ (เอเชีย)
-                let category, color, badgeBg, advice, positionPercent;
-                
-                if (bmi < 18.5) {
-                    category = 'น้ำหนักน้อย / ผอม';
-                    color = 'text-blue-400';
-                    badgeBg = 'bg-blue-900/50 text-blue-300 border border-blue-700/50';
-                    positionPercent = (bmi / 18.5) * 20; // 0-20%
-                    advice = 'คุณมีน้ำหนักต่ำกว่าเกณฑ์ ควรเพิ่มการทานอาหารที่มีโปรตีนและคาร์โบไฮเดรตเชิงซ้อน แนะนำให้ทานอาหารให้มากกว่า TDEE ประมาณ 300-500 kcal ต่อวัน และเวทเทรนนิ่งเพื่อสร้างกล้ามเนื้อ';
-                } else if (bmi < 23.0) {
-                    category = 'ปกติ (สุขภาพดี)';
-                    color = 'text-green-400';
-                    badgeBg = 'bg-green-900/50 text-green-300 border border-green-700/50';
-                    positionPercent = 20 + ((bmi - 18.5) / (23.0 - 18.5)) * 20; // 20-40%
-                    advice = 'เยี่ยมมาก! คุณมีน้ำหนักและสัดส่วนที่เหมาะสม ควรรักษาสมดุลการกินให้เท่ากับ TDEE และออกกำลังกายอย่างสม่ำเสมอเพื่อสุขภาพที่ดีในระยะยาว';
-                } else if (bmi < 25.0) {
-                    category = 'ท้วม / โรคอ้วนระดับ 1';
-                    color = 'text-yellow-400';
-                    badgeBg = 'bg-yellow-900/50 text-yellow-300 border border-yellow-700/50';
-                    positionPercent = 40 + ((bmi - 23.0) / (25.0 - 23.0)) * 20; // 40-60%
-                    advice = 'น้ำหนักของคุณเริ่มเกินมาตรฐาน ควรระวังเรื่องอาหาร ลดของหวานและของทอด แนะนำให้ทานอาหารน้อยกว่า TDEE ประมาณ 300 kcal และเพิ่มการคาร์ดิโอ';
-                } else if (bmi < 30.0) {
-                    category = 'อ้วน / โรคอ้วนระดับ 2';
-                    color = 'text-orange-400';
-                    badgeBg = 'bg-orange-900/50 text-orange-300 border border-orange-700/50';
-                    positionPercent = 60 + ((bmi - 25.0) / (30.0 - 25.0)) * 20; // 60-80%
-                    advice = 'มีความเสี่ยงต่อโรคที่เกิดจากความอ้วน ควรควบคุมอาหารอย่างจริงจัง จำกัดแป้งและน้ำตาล ทานโปรตีนและผักให้มากขึ้น ร่วมกับการออกกำลังกายเบาๆ เพื่อไม่ให้กระทบข้อเข่า';
-                } else {
-                    category = 'อ้วนมาก / อันตราย';
-                    color = 'text-red-400';
-                    badgeBg = 'bg-red-900/50 text-red-300 border border-red-700/50';
-                    positionPercent = 80 + Math.min(20, ((bmi - 30.0) / 10) * 20); // 80-100% (Cap at 100%)
-                    advice = 'อยู่ในเกณฑ์อันตราย เสี่ยงต่อโรคเบาหวาน ความดัน และโรคหัวใจ แนะนำให้ปรึกษาแพทย์หรือนักโภชนาการเพื่อวางแผนการลดน้ำหนักอย่างถูกวิธีและปลอดภัยที่สุด';
-                }
-
-                // Cap percentage
-                positionPercent = Math.max(0, Math.min(100, positionPercent));
-
-                // ปลดล็อก Dashboard
-                overlay.style.display = 'none';
-                dashboard.classList.remove('opacity-50', 'blur-sm', 'pointer-events-none');
-                
-                // แสดงชื่อผู้ใช้ และเปิดใช้งานปุ่มพิมพ์รายงาน
-                userGreeting.textContent = สำหรับ: คุณ${userName};
-                printBtn.classList.remove('hidden');
-
-                // Animation สำหรับตัวเลข
-                animateValue(bmiScoreEl, 0, parseFloat(bmi.toFixed(1)), 1000, true);
-                animateValue(bmrScoreEl, 0, Math.round(bmr), 1000);
-                animateValue(tdeeScoreEl, 0, Math.round(tdee), 1000);
-                
-                // อัปเดตข้อมูลอื่นๆ
-                bmiBadgeEl.className = inline-block mt-3 px-4 py-1.5 rounded-full text-sm font-bold ${badgeBg};
-                bmiBadgeEl.textContent = category;
-                
-                idealWeightEl.textContent = ${minWeight.toFixed(1)} - ${maxWeight.toFixed(1)} กก.;
-                adviceBox.innerHTML = <strong>คำแนะนำ:</strong> ${advice};
-
-                // เลื่อน Indicator แท่งสี
-                setTimeout(() => {
-                    bmiIndicator.style.left = ${positionPercent}%;
-                }, 100);
-
-                // Scroll บนมือถือให้เห็นผลลัพธ์
-                if(window.innerWidth < 1024) {
-                    setTimeout(() => {
-                        dashboard.scrollIntoView({ behavior: 'smooth', block: 'start' });
-                    }, 300);
-                }
-            });
-
-            // ปุ่มพิมพ์หรือบันทึก PDF
-            printBtn.addEventListener('click', () => {
-                window.print();
-            });
-
-            // Helper function สำหรับแอนิเมชันตัวเลข
-            function animateValue(obj, start, end, duration, isFloat = false) {
-                let startTimestamp = null;
-                const step = (timestamp) => {
-                    if (!startTimestamp) startTimestamp = timestamp;
-                    const progress = Math.min((timestamp - startTimestamp) / duration, 1);
-                    // easeOutQuart
-                    const easeProgress = 1 - Math.pow(1 - progress, 4);
-                    
-                    const currentVal = start + (end - start) * easeProgress;
-                    obj.innerHTML = isFloat ? currentVal.toFixed(1) : Math.floor(currentVal).toLocaleString();
-                    
-                    if (progress < 1) {
-                        window.requestAnimationFrame(step);
-                    } else {
-                        obj.innerHTML = isFloat ? end.toFixed(1) : end.toLocaleString();
-                    }
-                };
-                window.requestAnimationFrame(step);
-            }
+            updateMetrics();
         });
+
+        // Set Gender Toggle
+        function setGender(gender) {
+            currentGender = gender;
+            const maleBtn = document.getElementById('genderMale');
+            const femaleBtn = document.getElementById('genderFemale');
+
+            if (gender === 'male') {
+                maleBtn.className = "gender-btn relative py-3 px-4 rounded-xl border font-medium text-sm flex items-center justify-center gap-2 transition duration-200 bg-emerald-950/40 border-emerald-500/80 text-emerald-400 shadow-lg shadow-emerald-950/50";
+                femaleBtn.className = "gender-btn relative py-3 px-4 rounded-xl border border-slate-800 bg-slate-900/60 text-slate-400 font-medium text-sm flex items-center justify-center gap-2 hover:border-slate-700 transition duration-200";
+            } else {
+                femaleBtn.className = "gender-btn relative py-3 px-4 rounded-xl border font-medium text-sm flex items-center justify-center gap-2 transition duration-200 bg-emerald-950/40 border-emerald-500/80 text-emerald-400 shadow-lg shadow-emerald-950/50";
+                maleBtn.className = "gender-btn relative py-3 px-4 rounded-xl border border-slate-800 bg-slate-900/60 text-slate-400 font-medium text-sm flex items-center justify-center gap-2 hover:border-slate-700 transition duration-200";
+            }
+
+            updateMetrics();
+        }
+
+        function updateMetrics() {
+            // Retrieve Input Values
+            const age = parseInt(document.getElementById('age').value);
+            const height = parseInt(document.getElementById('height').value);
+            const weight = parseInt(document.getElementById('weight').value);
+            const waist = parseInt(document.getElementById('waist').value);
+            const activity = parseFloat(document.getElementById('activity').value);
+
+            // Update Value Displays
+            document.getElementById('ageVal').textContent = age;
+            document.getElementById('heightVal').textContent = height;
+            document.getElementById('weightVal').textContent = weight;
+            document.getElementById('waistVal').textContent = waist;
+
+            // 1. BMI Calculation
+            const heightMeter = height / 100;
+            const bmi = weight / (heightMeter * heightMeter);
+            const bmiFormatted = bmi.toFixed(1);
+            document.getElementById('bmiValue').textContent = bmiFormatted;
+
+            // Asian BMI Scale Logic
+            let bmiStatus = '';
+            let bmiBadgeColor = '';
+            let percentagePosition = 0; // for slider indicator
+
+            if (bmi < 18.5) {
+                bmiStatus = 'ผอม (น้ำหนักน้อยกว่าเกณฑ์)';
+                bmiBadgeColor = 'bg-blue-950/80 border-blue-500/50 text-blue-400';
+                percentagePosition = Math.max(2, (bmi / 18.5) * 18.5);
+            } else if (bmi <= 22.9) {
+                bmiStatus = 'ปกติ (สมส่วน)';
+                bmiBadgeColor = 'bg-emerald-950/80 border-emerald-500/50 text-emerald-400';
+                percentagePosition = 18.5 + ((bmi - 18.5) / (22.9 - 18.5)) * 22;
+            } else if (bmi <= 24.9) {
+                bmiStatus = 'ท้วม (น้ำหนักเกิน)';
+                bmiBadgeColor = 'bg-amber-950/80 border-amber-500/50 text-amber-400';
+                percentagePosition = 40.5 + ((bmi - 23.0) / (24.9 - 23.0)) * 10;
+            } else if (bmi <= 29.9) {
+                bmiStatus = 'อ้วน (ระดับ 1)';
+                bmiBadgeColor = 'bg-orange-950/80 border-orange-500/50 text-orange-400';
+                percentagePosition = 50.5 + ((bmi - 25.0) / (29.9 - 25.0)) * 24.5;
+            } else {
+                bmiStatus = 'อ้วนมาก (ระดับ 2)';
+                bmiBadgeColor = 'bg-red-950/80 border-red-500/50 text-red-400';
+                percentagePosition = Math.min(96, 75 + ((bmi - 30.0) / 10) * 20);
+            }
+
+            const badge = document.getElementById('bmiStatusBadge');
+            badge.textContent = bmiStatus;
+            badge.className = `px-3.5 py-1 text-xs font-semibold rounded-full border transition ${bmiBadgeColor}`;
+
+            // Update Meter Pin Location
+            document.getElementById('bmiPin').style.left = `${percentagePosition}%`;
+
+            // 2. BMR Calculation (Mifflin-St Jeor)
+            let bmr = 0;
+            if (currentGender === 'male') {
+                bmr = (10 * weight) + (6.25 * height) - (5 * age) + 5;
+            } else {
+                bmr = (10 * weight) + (6.25 * height) - (5 * age) - 161;
+            }
+            const bmrRounded = Math.round(bmr);
+            document.getElementById('bmrValue').textContent = bmrRounded.toLocaleString();
+
+            // 3. TDEE Calculation
+            const tdee = Math.round(bmr * activity);
+            document.getElementById('tdeeValue').textContent = tdee.toLocaleString();
+
+            // 4. Body Fat % Estimation (Deurenberg Formula)
+            const genderFactor = (currentGender === 'male') ? 1 : 0;
+            let bodyFat = (1.20 * bmi) + (0.23 * age) - (10.8 * genderFactor) - 5.4;
+            bodyFat = Math.max(3, Math.min(60, bodyFat));
+            document.getElementById('fatPercentValue').textContent = bodyFat.toFixed(1);
+
+            let fatStatus = 'สมส่วน';
+            if (currentGender === 'male') {
+                if (bodyFat < 10) fatStatus = 'ไขมันต่ำมาก';
+                else if (bodyFat <= 20) fatStatus = 'สมส่วนดีเยี่ยม';
+                else if (bodyFat <= 25) fatStatus = 'ไขมันปานกลาง';
+                else fatStatus = 'ไขมันสูง';
+            } else {
+                if (bodyFat < 18) fatStatus = 'ไขมันต่ำมาก';
+                else if (bodyFat <= 28) fatStatus = 'สมส่วนดีเยี่ยม';
+                else if (bodyFat <= 33) fatStatus = 'ไขมันปานกลาง';
+                else fatStatus = 'ไขมันสูง';
+            }
+            document.getElementById('fatStatusText').textContent = fatStatus;
+
+            // 5. Waist-to-Height Ratio (WHtR)
+            const whtr = waist / height;
+            document.getElementById('whtrValue').textContent = whtr.toFixed(2);
+
+            const whtrText = document.getElementById('whtrStatusText');
+            if (whtr <= 0.5) {
+                whtrText.textContent = 'รอบเอวปกติ (ไม่อ้วนลงพุง)';
+                whtrText.className = 'text-[10px] text-emerald-400 block mt-1';
+            } else {
+                whtrText.textContent = 'มีความเสี่ยงอ้วนลงพุง';
+                whtrText.className = 'text-[10px] text-amber-400 block mt-1';
+            }
+
+            // 6. Ideal Weight Range (Asian BMI 18.5 - 22.9)
+            const minIdeal = (18.5 * heightMeter * heightMeter).toFixed(1);
+            const maxIdeal = (22.9 * heightMeter * heightMeter).toFixed(1);
+            document.getElementById('idealWeightRange').textContent = `${minIdeal} – ${maxIdeal} กก.`;
+
+            // 7. Recommended Daily Water Intake
+            const waterLiters = (weight * 0.035).toFixed(1);
+            const glasses = Math.round((weight * 35) / 250);
+            document.getElementById('waterIntake').textContent = `${waterLiters} ลิตร / วัน`;
+            document.getElementById('waterGlasses').textContent = `~ ${glasses} แก้ว`;
+
+            // Dynamic Health Advice
+            updateAdviceText(bmi, whtr);
+        }
+
+        function updateAdviceText(bmi, whtr) {
+            const adviceBox = document.getElementById('healthAdviceBox');
+            const adviceText = document.getElementById('healthAdviceText');
+
+            if (bmi < 18.5) {
+                adviceBox.className = "mt-5 p-4 rounded-xl bg-blue-950/30 border border-blue-800/40 flex items-start space-x-3";
+                adviceText.textContent = "น้ำหนักของคุณน้อยกว่าเกณฑ์ปกติ ควรเพิ่มการรับประทานอาหารที่มีโปรตีนสูง คาร์โบไฮเดรตเชิงซ้อน และเน้นการออกกำลังกายแบบเวทเทรนนิ่งเพื่อเสริมสร้างมวลกล้ามเนื้อ";
+            } else if (bmi <= 22.9) {
+                adviceBox.className = "mt-5 p-4 rounded-xl bg-emerald-950/30 border border-emerald-800/40 flex items-start space-x-3";
+                adviceText.textContent = "ยินดีด้วย! คุณมีน้ำหนักและดัชนีมวลกายอยู่ในเกณฑ์สมส่วน สุขภาพดี ควรดูแลการรับประทานอาหารให้สมดุลและออกกำลังกายเป็นประจำสม่ำเสมอ";
+            } else if (bmi <= 24.9) {
+                adviceBox.className = "mt-5 p-4 rounded-xl bg-amber-950/30 border border-amber-800/40 flex items-start space-x-3";
+                adviceText.textContent = "ระดับ BMI ของคุณเริ่มเข้าสู่ภาวะท้วม ควบคุมปริมาณน้ำตาล คาร์โบไฮเดรตแปรรูป และการรับประทานของทอด ควบคู่กับการออกกำลังกายแอโรบิก 150 นาที/สัปดาห์";
+            } else {
+                adviceBox.className = "mt-5 p-4 rounded-xl bg-red-950/30 border border-red-800/40 flex items-start space-x-3";
+                adviceText.textContent = "น้ำหนักตัวอยู่ในภาวะเสี่ยงต่อสุขภาพ ควรเริ่มวางแผนปรับเปลี่ยนโภชนาการ ลดแคลอรีที่ได้รับต่อวัน ร่วมกับการออกกำลังกายอย่างเหมาะสม และปรึกษาผู้เชี่ยวชาญด้านสุขภาพ";
+            }
+        }
+
+        function resetInputs() {
+            document.getElementById('userName').value = 'คุณผู้ใช้งาน';
+            document.getElementById('displayUserName').textContent = 'คุณผู้ใช้งาน';
+            document.getElementById('age').value = 25;
+            document.getElementById('height').value = 170;
+            document.getElementById('weight').value = 65;
+            document.getElementById('waist').value = 75;
+            document.getElementById('activity').value = '1.55';
+            setGender('male');
+            showToast('ล้างข้อมูลเรียบร้อยแล้ว');
+        }
+
+        function saveRecord() {
+            const name = document.getElementById('userName').value.trim() || 'คุณผู้ใช้งาน';
+            const bmi = document.getElementById('bmiValue').textContent;
+            const bmiStatus = document.getElementById('bmiStatusBadge').textContent;
+            const bmr = document.getElementById('bmrValue').textContent;
+            const tdee = document.getElementById('tdeeValue').textContent;
+            const now = new Date().toLocaleString('th-TH', { dateStyle: 'short', timeStyle: 'short' });
+
+            const record = { id: Date.now(), name, bmi, bmiStatus, bmr, tdee, date: now };
+            savedHistory.unshift(record);
+            localStorage.setItem('health_pro_history', JSON.stringify(savedHistory));
+            showToast('บันทึกผลการวิเคราะห์แล้ว');
+        }
+
+        function openHistoryModal() {
+            const list = document.getElementById('historyList');
+            if (savedHistory.length === 0) {
+                list.innerHTML = `<div class="text-center py-8 text-slate-500 text-xs">ยังไม่มีประวัติการบันทึก</div>`;
+            } else {
+                list.innerHTML = savedHistory.map(item => `
+                    <div class="glass-card-inner p-3.5 rounded-xl border border-slate-800 flex items-center justify-between">
+                        <div>
+                            <div class="flex items-center space-x-2">
+                                <span class="text-xs font-semibold text-white">${item.name}</span>
+                                <span class="text-[10px] text-slate-400">${item.date}</span>
+                            </div>
+                            <div class="text-xs text-emerald-400 mt-1">
+                                BMI: <strong>${item.bmi}</strong> (${item.bmiStatus.trim()})
+                            </div>
+                        </div>
+                        <div class="flex items-center space-x-3">
+                            <span class="text-[11px] text-slate-400">TDEE: ${item.tdee} kcal</span>
+                            <button onclick="deleteRecord(${item.id})" class="text-slate-500 hover:text-red-400 transition">
+                                <i class="fa-solid fa-trash-can text-sm"></i>
+                            </button>
+                        </div>
+                    </div>
+                `).join('');
+            }
+            document.getElementById('historyModal').classList.remove('hidden');
+        }
+
+        function closeHistoryModal() {
+            document.getElementById('historyModal').classList.add('hidden');
+        }
+
+        function deleteRecord(id) {
+            savedHistory = savedHistory.filter(item => item.id !== id);
+            localStorage.setItem('health_pro_history', JSON.stringify(savedHistory));
+            openHistoryModal();
+            showToast('ลบรายการบันทึกแล้ว');
+        }
+
+        function clearHistory() {
+            savedHistory = [];
+            localStorage.setItem('health_pro_history', JSON.stringify([]));
+            openHistoryModal();
+            showToast('ล้างประวัติทั้งหมดเรียบร้อย');
+        }
+
+        function openSettingsModal() {
+            document.getElementById('settingsModal').classList.remove('hidden');
+        }
+
+        function closeSettingsModal() {
+            document.getElementById('settingsModal').classList.add('hidden');
+        }
+
+        function saveSettings() {
+            closeSettingsModal();
+            showToast('บันทึกการตั้งค่าแล้ว');
+        }
+
+        function printReport() {
+            window.print();
+        }
+
+        function showToast(msg) {
+            const toast = document.getElementById('toast');
+            document.getElementById('toastMsg').textContent = msg;
+            toast.classList.remove('translate-y-20', 'opacity-0', 'pointer-events-none');
+            setTimeout(() => {
+                toast.classList.add('translate-y-20', 'opacity-0', 'pointer-events-none');
+            }, 2500);
+        }
     </script>
 </body>
 </html>
